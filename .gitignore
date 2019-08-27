@@ -18,6 +18,9 @@ release/
 # Gradle files
 .gradle/
 build/
+gradlew
+gradlew.bat
+settings.gradlegit stat
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -33,7 +36,8 @@ proguard/
 captures/
 
 # IntelliJ
-*.iml
+*.imlgit stat
+.idea/
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/gradle.xml
@@ -80,4 +84,4 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 
-git 
+git
