@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="colorPrimary">#F79F6B</color>
+  <color name="colorPrimaryDark">#353c3e</color>
+  <color name="colorAccent">#D81B60</color>
+  <color name="goaMainRed">#E07B64</color>
+  <color name="mainOrange">#F79F6B</color>
+  <color name="mainYellow">#FEC466</color>
+  <color name="goaTextBlue">#1B3E46</color>
+  <color name="normalWhite">#ffffff</color>
+  <color name="correctGreen">#bae2d2</color>
+  <color name="incorrectRed">#fe9a9a</color>
+  <color name="darkGrey">#353c3e</color>
+</resources>
