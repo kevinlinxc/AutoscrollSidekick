@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <include
+        android:id="@+id/include"
+        layout="@layout/content_scroll"/>
 
-    <com.github.chrisbanes.photoview.PhotoView
-        android:id="@+id/imagePage"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        android:clickable="false"
-        android:scaleType="fitCenter"
-        tools:srcCompat="@tools:sample/avatars" />
-
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/playFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/icon_triangle"
+        app:backgroundTint="@color/mainOrange"
+        app:borderWidth="0.5dp"
+        app:elevation="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
