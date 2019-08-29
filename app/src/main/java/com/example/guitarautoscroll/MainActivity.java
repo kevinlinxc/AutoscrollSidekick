@@ -1,6 +1,7 @@
 package com.example.guitarautoscroll;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -11,12 +12,15 @@ import android.provider.MediaStore;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.karumi.dexter.Dexter;
@@ -30,15 +34,22 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
-public class MainActivity extends AppCompatActivity  { //implements imageAdapter.imageRecyclerClickListener
+public class MainActivity extends AppCompatActivity  implements imageAdapter.ItemClickListener{
+
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private imageAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private static final int GALLERY=1;
+    private ProgressDialog mBusyProgress = null;
+    private Context mContext = this;
+    private List<Tab> mTabs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +68,11 @@ public class MainActivity extends AppCompatActivity  { //implements imageAdapter
 //                    .setAction("Action", null).show();
             }
         });
-//        recyclerView = (RecyclerView) findViewById(R.id.imagesRecyclerView);
-//        layoutManager = new LinearLayoutManager(this);
-//        recyclerView.setLayoutManager(layoutManager);
-//        //mAdapter = new imageAdapter(myDataset);
-//        recyclerView.setAdapter(mAdapter);
+        RecyclerView rV= (RecyclerView) findViewById(R.id.imagesRecyclerView);
+        rV.setLayoutManager(new LinearLayoutManager(this));
+        mAdapter= new imageAdapter(this,mTabs);
+        mAdapter.setClickListener(this);
+        rV.setAdapter(mAdapter);
     }
 
     @Override
@@ -100,26 +111,45 @@ public class MainActivity extends AppCompatActivity  { //implements imageAdapter
 
     //handles the result of the picture that is chosen/taken
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == this.RESULT_CANCELED) {
             return;
         }
         if (requestCode == GALLERY) {
             if (data != null) {
-                Uri contentURI = data.getData();
-                try {
-                    Bitmap galleryPic = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
-                    String path = saveToInternalStorage(galleryPic);
-                    Intent intent = new Intent(this, ScrollActivity.class);
-                    intent.putExtra(ScrollActivity.PATH,path);
-                    startActivity(intent);
-
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(MainActivity.this, "Failed!", Toast.LENGTH_SHORT).show();
-                }
+                final Uri contentURI = data.getData();
+                final CoordinatorLayout cLayout =
+                    (CoordinatorLayout) findViewById(R.id.mainActivityLayout);
+                showBusyIndicator();
+                new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            final Bitmap galleryPic =
+                                MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), contentURI);
+                            cLayout.post(new Runnable() {
+                                public void run() {
+                                    String path = saveToInternalStorage(galleryPic);
+                                    Date c = Calendar.getInstance().getTime();
+                                    System.out.println("Current time = "+c);
+                                    //code to change a date to string
+                                    Tab tab = new Tab("Untitled",c,path);
+                                    mTabs.add(tab);
+                                    Intent intent = new Intent(mContext, ScrollActivity.class);
+                                    intent.putExtra(ScrollActivity.PATH, path);
+                                    runOnUiThread(new Thread(new Runnable() {
+                                        public void run() {
+                                            hideBusyIndicator();
+                                        }
+                                    }));
+                                    startActivity(intent);
+                                }
+                            });
+                        } catch (IOException ie) {
+                            ie.printStackTrace();
+                        }
+                    }
+                }).start();
             }
         }
     }
@@ -180,5 +210,29 @@ public class MainActivity extends AppCompatActivity  { //implements imageAdapter
             })
             .onSameThread()
             .check();
+    }
+
+    private void showBusyIndicator() {
+        this.mBusyProgress = new ProgressDialog(this);
+        this.mBusyProgress.setTitle("Busy");
+        this.mBusyProgress.setMessage("Processing...");
+        this.mBusyProgress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        this.mBusyProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        this.mBusyProgress.getWindow().
+            setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        this.mBusyProgress.show();
+    }
+
+    private void hideBusyIndicator() {
+        this.mBusyProgress.dismiss();
+        this.mBusyProgress = null;
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        Toast.makeText(this,
+            "You clicked " + mAdapter.getItem(position) + " on row number " + position,
+            Toast.LENGTH_SHORT).show();
     }
 }
