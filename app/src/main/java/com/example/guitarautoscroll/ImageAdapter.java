@@ -18,37 +18,43 @@ import java.util.Locale;
 import androidx.recyclerview.widget.RecyclerView;
 
 import static android.content.ContentValues.TAG;
-public class imageAdapter extends RecyclerView.Adapter<imageAdapter.ViewHolder> {
+public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<Tab> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
+    private Context context;
 
     // data is passed into the constructor
-    imageAdapter(Context context, List<Tab> data) {
+    ImageAdapter(Context context, List<Tab> data) {
+        this.context=context;
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
     }
 
     // inflates the row layout from xml when needed
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        Log.d("DebugA", "OnCreateViewHolder");
         View view = mInflater.inflate(R.layout.cell_image_tab, parent, false);
-        return new ViewHolder(view);
+        TabViewHolder viewHolder = new TabViewHolder(view);
+        return viewHolder;
     }
 
     // binds the data to the TextView in each row
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        Log.d("DebugA", "onBindViewHolder");
+        TabViewHolder tvh = (TabViewHolder) holder;
         String title = mData.get(position).getTitle();
         Date date = mData.get(position).getDate();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.CANADA);
         String formattedDate=sdf.format(date);
         String path=mData.get(position).getPath();
         Bitmap preview = BitmapFactory.decodeFile(path);
-        holder.titleView.setText(title);
-        holder.dateView.setText(formattedDate);
-        holder.mImageView.setImageBitmap(preview);
+        tvh.titleView.setText(title);
+        tvh.dateView.setText(formattedDate);
+        tvh.mImageView.setImageBitmap(preview);
     }
 
     // total number of rows
@@ -59,12 +65,12 @@ public class imageAdapter extends RecyclerView.Adapter<imageAdapter.ViewHolder> 
 
 
     // stores and recycles views as they are scrolled off screen
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class TabViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView titleView;
         TextView dateView;
         ImageView mImageView;
 
-        ViewHolder(View itemView) {
+        TabViewHolder(View itemView) {
             super(itemView);
             titleView = itemView.findViewById(R.id.imageTitle);
             dateView = itemView.findViewById(R.id.dateView);
@@ -91,5 +97,10 @@ public class imageAdapter extends RecyclerView.Adapter<imageAdapter.ViewHolder> 
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
     }
 }

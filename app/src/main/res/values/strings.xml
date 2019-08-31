@@ -1,4 +1,5 @@
 <resources>
   <string name="app_name">Autoscroll</string>
   <string name="action_settings">Settings</string>
+    <string name ="clear_tabs">Erase saved tabs</string>
 </resources>

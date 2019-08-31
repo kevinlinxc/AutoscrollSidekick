@@ -5,9 +5,11 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -23,6 +25,8 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -34,17 +38,19 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
-public class MainActivity extends AppCompatActivity  implements imageAdapter.ItemClickListener{
+public class MainActivity extends AppCompatActivity  implements ImageAdapter.ItemClickListener{
 
-    private RecyclerView recyclerView;
-    private imageAdapter mAdapter;
+    private RecyclerView rV;
+    private ImageAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private static final int GALLERY=1;
     private ProgressDialog mBusyProgress = null;
@@ -68,11 +74,10 @@ public class MainActivity extends AppCompatActivity  implements imageAdapter.Ite
 //                    .setAction("Action", null).show();
             }
         });
-        RecyclerView rV= (RecyclerView) findViewById(R.id.imagesRecyclerView);
+        rV= (RecyclerView) findViewById(R.id.imagesRecyclerView);
         rV.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter= new imageAdapter(this,mTabs);
-        mAdapter.setClickListener(this);
-        rV.setAdapter(mAdapter);
+        loadData();
+        setRecycler();
     }
 
     @Override
@@ -92,6 +97,10 @@ public class MainActivity extends AppCompatActivity  implements imageAdapter.Ite
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+
+        if (id == R.id.clear_tabs){
+            clearTabs();
         }
 
         return super.onOptionsItemSelected(item);
@@ -129,14 +138,15 @@ public class MainActivity extends AppCompatActivity  implements imageAdapter.Ite
                                 MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), contentURI);
                             cLayout.post(new Runnable() {
                                 public void run() {
-                                    String path = saveToInternalStorage(galleryPic);
+                                    String[] paths = saveToInternalStorage(galleryPic);
                                     Date c = Calendar.getInstance().getTime();
-                                    System.out.println("Current time = "+c);
                                     //code to change a date to string
-                                    Tab tab = new Tab("Untitled",c,path);
+                                    Tab tab = new Tab("Untitled",c,paths[0], paths[1]);
+
                                     mTabs.add(tab);
                                     Intent intent = new Intent(mContext, ScrollActivity.class);
-                                    intent.putExtra(ScrollActivity.PATH, path);
+                                    intent.putExtra(ScrollActivity.PATH, paths[1]);
+                                    intent.putExtra(ScrollActivity.INDEX, mTabs.indexOf(tab));
                                     runOnUiThread(new Thread(new Runnable() {
                                         public void run() {
                                             hideBusyIndicator();
@@ -153,18 +163,25 @@ public class MainActivity extends AppCompatActivity  implements imageAdapter.Ite
             }
         }
     }
-    private String saveToInternalStorage(Bitmap bitmapImage){
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        loadData();
+
+    }
+    private String[] saveToInternalStorage(Bitmap bitmapImage){
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
         // path to /data/data/yourapp/app_data/imageDir
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
         // Create imageDir
-        File mypath=new File(directory,"tab.jpg");
+        File mypath=new File(directory,"tab.jpg"+mTabs.size());
 
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(mypath);
             // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 80, fos);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -174,7 +191,8 @@ public class MainActivity extends AppCompatActivity  implements imageAdapter.Ite
                 e.printStackTrace();
             }
         }
-        return directory.getAbsolutePath();
+        String [] paths = {mypath.getAbsolutePath(), directory.getAbsolutePath(),};
+        return paths;
     }
     //permissions necessary for camera
     private void requestMultiplePermissions() {
@@ -231,8 +249,68 @@ public class MainActivity extends AppCompatActivity  implements imageAdapter.Ite
 
     @Override
     public void onItemClick(View view, int position) {
-        Toast.makeText(this,
-            "You clicked " + mAdapter.getItem(position) + " on row number " + position,
-            Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(mContext, ScrollActivity.class);
+        intent.putExtra(ScrollActivity.PATH, mTabs.get(position).getDirectoryPath());
+        intent.putExtra(ScrollActivity.INDEX, position);
+        startActivity(intent);
+    }
+
+    public void saveData(){
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",
+            MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(mTabs);
+        editor.putString("tab list", json);
+        editor.apply();
+    }
+
+    private void loadData(){
+        SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",
+            MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString("tab list", null);
+        Type type = new TypeToken<List<Tab>>() {}.getType();
+        mTabs = gson.fromJson(json, type);
+
+        if (mTabs == null){
+            mTabs = new ArrayList<>();
+            Log.d("Main Activity","There were no prexisting tabs");
+        }
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        saveData();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        saveData();
+    }
+
+    public void clearTabs(){
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        // path to /data/data/yourapp/app_data/imageDir
+        File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        if (dir.isDirectory()){
+            File[] children = dir.listFiles();
+            Log.d("MainActivity","Files being deleted: "+children);
+            for (int i = 0; i<children.length;i++){
+                children[i].delete();
+            }
+        }
+        mTabs.clear();
+        setRecycler();
+    }
+
+    public void setRecycler(){
+        mAdapter= new ImageAdapter(this,mTabs);
+        mAdapter.setClickListener(this);
+        rV.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
     }
 }
