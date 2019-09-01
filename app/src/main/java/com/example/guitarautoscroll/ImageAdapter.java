@@ -17,7 +17,8 @@ import java.util.Locale;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import static android.content.ContentValues.TAG;
+import com.example.guitarautoscroll.CustomClasses.Tab;
+
 public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<Tab> mData;

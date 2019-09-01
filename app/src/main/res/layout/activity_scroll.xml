@@ -6,6 +6,10 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/barLayoutScroll"
         android:layout_width="match_parent"
@@ -19,8 +23,38 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
+            android:gravity="center_vertical"
             app:popupTheme="@style/AppTheme.PopupOverlay">
-            
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp">
+
+                <TextView
+                    android:id="@+id/leftScrollTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pixels/s:" />
+
+                <SeekBar
+                    android:id="@+id/sliderScroll"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:max="160"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    android:progress="79" />
+
+                <TextView
+                    android:id="@+id/rightScrollTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Default: 80" />
+            </LinearLayout>
         </androidx.appcompat.widget.Toolbar>
 
 
@@ -32,6 +66,7 @@
         layout="@layout/content_scroll"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barLayoutScroll" />
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/playFab"

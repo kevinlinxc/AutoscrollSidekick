@@ -8,15 +8,19 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
+import com.example.guitarautoscroll.CustomClasses.ASApplication;
+import com.example.guitarautoscroll.CustomClasses.Tab;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -24,15 +28,18 @@ import androidx.core.content.ContextCompat;
 
 public class ScrollActivity extends AppCompatActivity {
 
-    public static final String PATH = "Path";
+    public static final String PATH = "path";
     public static final String INDEX = "index";
+    public static final String SPEED = "speed";
+    public static final String TAB ="tab";
     public boolean playing=false;
     private ScrollView imageScroll;
     private Context mContext=this;
     private final Handler handler = new Handler();
     private int index;
     private Toolbar toolbar;
-    private int speed = 80;
+    private int speed;
+    private List<Tab> mTabs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +48,10 @@ public class ScrollActivity extends AppCompatActivity {
         String path = getIntent().getStringExtra(PATH);
         Log.d("ScrollActivity","Pulling image from path:" + path);
         index = getIntent().getIntExtra(INDEX,0);
+        speed = getIntent().getIntExtra(SPEED,80);
         loadImageFromStorage(path);
         imageScroll = (ScrollView)findViewById(R.id.imageScroll);
+        mTabs= ASApplication.getmTabs();
 
         toolbar = (Toolbar) findViewById(R.id.toolbarScroll);
         if (toolbar != null) {
@@ -50,7 +59,28 @@ public class ScrollActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
-
+        final SeekBar sbar = (SeekBar) findViewById(R.id.sliderScroll);
+        sbar.setProgress(speed);
+        final TextView leftTV = (TextView)findViewById(R.id.leftScrollTV);
+        leftTV.setText(getResources().getString(R.string.pixels)+sbar.getProgress());
+        sbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int pval = 0;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                pval = progress;
+                speed = pval;
+                leftTV.setText(getResources().getString(R.string.pixels)+sbar.getProgress());
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                //write custom code to on start progress
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                leftTV.setText(getResources().getString(R.string.pixels)+sbar.getProgress());
+                mTabs.get(index).setPixelSpeed(sbar.getProgress());
+            }
+        });
         final FloatingActionButton fab = findViewById(R.id.playFab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,6 +104,12 @@ public class ScrollActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        mTabs= ASApplication.getmTabs();
     }
 
     @Override
@@ -109,7 +145,7 @@ public class ScrollActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     if (playing) {
-                        imageScroll.smoothScrollBy(0, speed/40
+                        imageScroll.smoothScrollBy(0, Math.round(speed/40)
                         );
                     } else {
                         imageScroll.smoothScrollBy(0, 0);
@@ -120,5 +156,17 @@ public class ScrollActivity extends AppCompatActivity {
         } else {
             imageScroll.smoothScrollBy(0, 0);
         }
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        ASApplication.setmTabs(mTabs);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        ASApplication.setmTabs(mTabs);
     }
 }

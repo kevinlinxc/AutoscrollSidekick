@@ -9,8 +9,10 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
+
+import com.example.guitarautoscroll.CustomClasses.ASApplication;
+import com.example.guitarautoscroll.CustomClasses.Tab;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,7 +41,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
     private static final int GALLERY=1;
     private ProgressDialog mBusyProgress = null;
     private Context mContext = this;
-    private List<Tab> mTabs;
+    public static List<Tab> mTabs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +75,7 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
 //                    .setAction("Action", null).show();
             }
         });
+
         rV= (RecyclerView) findViewById(R.id.imagesRecyclerView);
         rV.setLayoutManager(new LinearLayoutManager(this));
         loadData();
@@ -141,12 +143,14 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
                                     String[] paths = saveToInternalStorage(galleryPic);
                                     Date c = Calendar.getInstance().getTime();
                                     //code to change a date to string
-                                    Tab tab = new Tab("Untitled",c,paths[0], paths[1]);
+                                    Tab tab = new Tab("Untitled",c,paths[0], paths[1],82);
 
                                     mTabs.add(tab);
                                     Intent intent = new Intent(mContext, ScrollActivity.class);
                                     intent.putExtra(ScrollActivity.PATH, paths[1]);
                                     intent.putExtra(ScrollActivity.INDEX, mTabs.indexOf(tab));
+                                    intent.putExtra(ScrollActivity.SPEED,tab.getPixelSpeed());
+                                    intent.putExtra(ScrollActivity.TAB,tab);
                                     runOnUiThread(new Thread(new Runnable() {
                                         public void run() {
                                             hideBusyIndicator();
@@ -167,9 +171,9 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
     @Override
     public void onResume(){
         super.onResume();
-        loadData();
-
+        setRecycler();
     }
+
     private String[] saveToInternalStorage(Bitmap bitmapImage){
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
         // path to /data/data/yourapp/app_data/imageDir
@@ -252,6 +256,8 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
         Intent intent = new Intent(mContext, ScrollActivity.class);
         intent.putExtra(ScrollActivity.PATH, mTabs.get(position).getDirectoryPath());
         intent.putExtra(ScrollActivity.INDEX, position);
+        intent.putExtra(ScrollActivity.SPEED, mTabs.get(position).getPixelSpeed());
+        intent.putExtra(ScrollActivity.TAB,mTabs.get(position));
         startActivity(intent);
     }
 
@@ -263,6 +269,7 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
         String json = gson.toJson(mTabs);
         editor.putString("tab list", json);
         editor.apply();
+        ASApplication.setmTabs(mTabs);
     }
 
     private void loadData(){
@@ -272,6 +279,7 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
         String json = sharedPreferences.getString("tab list", null);
         Type type = new TypeToken<List<Tab>>() {}.getType();
         mTabs = gson.fromJson(json, type);
+        ASApplication.setmTabs(mTabs);
 
         if (mTabs == null){
             mTabs = new ArrayList<>();
