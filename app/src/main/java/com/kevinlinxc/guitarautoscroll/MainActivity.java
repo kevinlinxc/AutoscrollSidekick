@@ -1,4 +1,4 @@
-package com.example.guitarautoscroll;
+package com.kevinlinxc.guitarautoscroll;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -11,15 +11,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 
-import com.example.guitarautoscroll.CustomClasses.ASApplication;
-import com.example.guitarautoscroll.CustomClasses.Tab;
+import com.kevinlinxc.guitarautoscroll.CustomClasses.ASApplication;
+import com.kevinlinxc.guitarautoscroll.CustomClasses.Tab;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.PermissionChecker;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -52,14 +54,16 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
 
     private RecyclerView rV;
     private ImageAdapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+    private RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
     private static final int GALLERY=1;
     private ProgressDialog mBusyProgress = null;
     private Context mContext = this;
     public static List<Tab> mTabs;
+    private boolean firstTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme_NoActionBar);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -75,11 +79,22 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
 //                    .setAction("Action", null).show();
             }
         });
+        firstTime = getSharedPreferences("PREFERENCES", MODE_PRIVATE)
+            .getBoolean("firstTime", true);
+        getSharedPreferences("PREFERENCES", MODE_PRIVATE).edit()
+            .putBoolean("firstTime", false).apply();
 
         rV= (RecyclerView) findViewById(R.id.imagesRecyclerView);
-        rV.setLayoutManager(new LinearLayoutManager(this));
+        rV.setLayoutManager(layoutManager);
         loadData();
         setRecycler();
+    }
+    @Override
+    protected void onStart(){
+        super.onStart();
+        if (firstTime){
+            startTutorial();
+        }
     }
 
     @Override
@@ -103,6 +118,10 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
 
         if (id == R.id.clear_tabs){
             clearTabs();
+        }
+
+        if(id == R.id.help){
+            startTutorial();
         }
 
         return super.onOptionsItemSelected(item);
@@ -143,14 +162,13 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
                                     String[] paths = saveToInternalStorage(galleryPic);
                                     Date c = Calendar.getInstance().getTime();
                                     //code to change a date to string
-                                    Tab tab = new Tab("Untitled",c,paths[0], paths[1],82);
+                                    Tab tab = new Tab("Untitled",c,paths[0], paths[1],80);
 
                                     mTabs.add(tab);
                                     Intent intent = new Intent(mContext, ScrollActivity.class);
                                     intent.putExtra(ScrollActivity.PATH, paths[1]);
                                     intent.putExtra(ScrollActivity.INDEX, mTabs.indexOf(tab));
                                     intent.putExtra(ScrollActivity.SPEED,tab.getPixelSpeed());
-                                    intent.putExtra(ScrollActivity.TAB,tab);
                                     runOnUiThread(new Thread(new Runnable() {
                                         public void run() {
                                             hideBusyIndicator();
@@ -253,14 +271,12 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
 
     @Override
     public void onItemClick(View view, int position) {
-        Intent intent = new Intent(mContext, ScrollActivity.class);
-        intent.putExtra(ScrollActivity.PATH, mTabs.get(position).getDirectoryPath());
-        intent.putExtra(ScrollActivity.INDEX, position);
-        intent.putExtra(ScrollActivity.SPEED, mTabs.get(position).getPixelSpeed());
-        intent.putExtra(ScrollActivity.TAB,mTabs.get(position));
-        startActivity(intent);
+                Intent intent = new Intent(mContext, ScrollActivity.class);
+                intent.putExtra(ScrollActivity.PATH, mTabs.get(position).getDirectoryPath());
+                intent.putExtra(ScrollActivity.INDEX, position);
+                intent.putExtra(ScrollActivity.SPEED, mTabs.get(position).getPixelSpeed());
+                startActivity(intent);
     }
-
     public void saveData(){
         SharedPreferences sharedPreferences = getSharedPreferences("shared preferences",
             MODE_PRIVATE);
@@ -320,5 +336,18 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
         mAdapter.setClickListener(this);
         rV.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
+    }
+
+
+    private void startHomePage() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    private void startTutorial() {
+        Intent intent = new Intent(this, TutorialActivity.class);
+        intent.putExtra("fromActivity", "MainActivity");
+        startActivity(intent);
     }
 }

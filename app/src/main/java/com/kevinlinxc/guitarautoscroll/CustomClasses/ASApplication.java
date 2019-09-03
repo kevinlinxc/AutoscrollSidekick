@@ -1,4 +1,4 @@
-package com.example.guitarautoscroll.CustomClasses;
+package com.kevinlinxc.guitarautoscroll.CustomClasses;
 
 import android.app.Application;
 

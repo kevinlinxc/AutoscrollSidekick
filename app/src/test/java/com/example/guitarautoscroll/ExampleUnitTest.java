@@ -1,4 +1,4 @@
-package com.example.guitarautoscroll;
+package com.kevinlinxc.guitarautoscroll;
 
 import org.junit.Test;
 

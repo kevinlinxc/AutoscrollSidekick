@@ -16,7 +16,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:clickable="false">
 
             <ImageView
                 android:id="@+id/previewImage"
@@ -38,8 +39,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="16dp"
+                android:focusable="false"
                 android:fontFamily="@font/opensans_bold"
                 android:gravity="center_vertical"
+                android:inputType="textCapWords"
                 android:text="I am the title"
                 app:layout_constraintBottom_toTopOf="@id/dateView"
                 app:layout_constraintStart_toEndOf="@id/previewImage"
@@ -55,6 +58,21 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/previewImage"
                 app:layout_constraintTop_toBottomOf="@id/imageTitle" />
+
+            <ImageView
+                android:id="@+id/editButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="28dp"
+                android:adjustViewBounds="false"
+                android:clickable="true"
+                android:cropToPadding="false"
+                android:focusable="true"
+                android:scaleType="fitCenter"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/edit" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>

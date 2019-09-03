@@ -1,4 +1,4 @@
-package com.example.guitarautoscroll.CustomClasses;
+package com.kevinlinxc.guitarautoscroll.CustomClasses;
 
 import java.io.Serializable;
 import java.util.Date;

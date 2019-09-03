@@ -1,4 +1,4 @@
-package com.example.guitarautoscroll;
+package com.kevinlinxc.guitarautoscroll;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,8 +12,8 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.example.guitarautoscroll.CustomClasses.ASApplication;
-import com.example.guitarautoscroll.CustomClasses.Tab;
+import com.kevinlinxc.guitarautoscroll.CustomClasses.ASApplication;
+import com.kevinlinxc.guitarautoscroll.CustomClasses.Tab;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -31,7 +31,6 @@ public class ScrollActivity extends AppCompatActivity {
     public static final String PATH = "path";
     public static final String INDEX = "index";
     public static final String SPEED = "speed";
-    public static final String TAB ="tab";
     public boolean playing=false;
     private ScrollView imageScroll;
     private Context mContext=this;
