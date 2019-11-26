@@ -3,6 +3,7 @@ package com.kevinlinxc.guitarautoscroll;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -43,15 +44,18 @@ public class ScrollActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //scroll and image business
         setContentView(R.layout.activity_scroll);
         String path = getIntent().getStringExtra(PATH);
         Log.d("ScrollActivity","Pulling image from path:" + path);
         index = getIntent().getIntExtra(INDEX,0);
         speed = getIntent().getIntExtra(SPEED,80);
-        loadImageFromStorage(path);
+        BitmapLoader setBackground = new BitmapLoader(path);
+        setBackground.execute();
         imageScroll = (ScrollView)findViewById(R.id.imageScroll);
         mTabs= ASApplication.getmTabs();
 
+        //toolbar business
         toolbar = (Toolbar) findViewById(R.id.toolbarScroll);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
@@ -80,20 +84,22 @@ public class ScrollActivity extends AppCompatActivity {
                 mTabs.get(index).setPixelSpeed(sbar.getProgress());
             }
         });
+
+        //action button business
         final FloatingActionButton fab = findViewById(R.id.playFab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(!playing){
-                    Log.d("ScrollActivity","Clicked play");
+                    //Log.d("ScrollActivity","Clicked play");
                     fab.setImageDrawable(ContextCompat.getDrawable(mContext,
                         R.drawable.icon_pause));
-                    fab.setBackgroundColor(getResources().getColor(R.color.mainOrange));
+                    //fab.setBackgroundColor(getResources().getColor(R.color.mainOrange));
                     playing=true;
                     getSupportActionBar().hide();
                     updateScroll();
                 }else if(playing){
-                    Log.d("ScrollActivity","Clicked pause");
+                    //Log.d("ScrollActivity","Clicked pause");
                     fab.setImageDrawable(ContextCompat.getDrawable(mContext,
                         R.drawable.icon_triangle));
                     playing=false;
@@ -122,21 +128,6 @@ public class ScrollActivity extends AppCompatActivity {
         }
     }
 
-    private void loadImageFromStorage(String path)
-    {
-
-        try {
-            File f=new File(path, "tab.jpg"+index);
-            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-            PhotoView imageHolder = (PhotoView) findViewById(R.id.imagePage);
-            imageHolder.setImageBitmap(b);
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-
-    }
 
     public void updateScroll() {
         if (playing) {
@@ -160,12 +151,39 @@ public class ScrollActivity extends AppCompatActivity {
     @Override
     public void onStop(){
         super.onStop();
-        ASApplication.setmTabs(mTabs);
+        Thread save = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ASApplication.setmTabs(mTabs);
+            }
+        });
+        save.start();
+    }
+
+    public class BitmapLoader extends AsyncTask<Void,Void,Bitmap> {
+    private String path;
+
+    public  BitmapLoader(String path){
+        this.path=path;
     }
 
     @Override
-    public void onPause(){
-        super.onPause();
-        ASApplication.setmTabs(mTabs);
+        protected Bitmap doInBackground(Void... arg0){
+        Bitmap bitmap = null;
+        File f=new File(path, "tab.jpg"+index);
+        try {
+            bitmap = BitmapFactory.decodeStream(new FileInputStream(f));
+
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        }
+
+        return bitmap;
+    }
+    @Override
+        protected void onPostExecute(Bitmap result){
+        final PhotoView imageHolder = (PhotoView) findViewById(R.id.imagePage);
+        imageHolder.setImageBitmap(result);
+    }
     }
 }
