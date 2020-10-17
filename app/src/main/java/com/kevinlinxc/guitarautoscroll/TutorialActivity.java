@@ -5,16 +5,24 @@ import android.os.Bundle;
 
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import static android.content.ContentValues.TAG;
 
 public class TutorialActivity extends AppCompatActivity {
+
+    private LinearLayout Dots_Layout;
+    private ImageView[] dots;
+    private int numberscreens = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +34,24 @@ public class TutorialActivity extends AppCompatActivity {
         ViewPager viewPager = (ViewPager) findViewById(R.id.tutorialViewPager);
         viewPager.setAdapter(new TutorialPagerAdapter(this));
 
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                createDots(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        Dots_Layout = (LinearLayout) findViewById(R.id.dotsLayout);
+        createDots(0);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             // Remove shadow from action bar (nav bar)
@@ -54,6 +80,29 @@ public class TutorialActivity extends AppCompatActivity {
         decorView.setSystemUiVisibility(uiOptions);
     }
 
+    private void createDots(int index){
+        if(Dots_Layout !=null){
+            Dots_Layout.removeAllViews();
+            dots = new ImageView[numberscreens];
+
+            for(int i = 0; i<numberscreens;i++){
+                dots[i] = new ImageView(this);
+                if(i == index){
+                    dots[i].setImageDrawable(ContextCompat.getDrawable(this,
+                        R.drawable.active_dots));
+                }
+                else{
+                    dots[i].setImageDrawable(ContextCompat.getDrawable(this,
+                        R.drawable.inactive_dots));
+                }
+                LinearLayout.LayoutParams params =
+                    new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.setMargins(4,0,4,0);
+                Dots_Layout.addView(dots[i],params);
+            }
+        }
+    }
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
