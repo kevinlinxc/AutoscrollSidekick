@@ -1,6 +1,7 @@
 package com.kevinlinxc.guitarautoscroll;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
         loadData();
         setRecycler();
     }
+
     @Override
     protected void onStart(){
         super.onStart();
@@ -135,6 +137,8 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
     public void choosePhotoFromGallery() {
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
             android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        //allows selection of multiple images, which I'm trying to use for pic stitching
+        //galleryIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         //This sends info to onActivityResult
         startActivityForResult(galleryIntent, GALLERY);
     }
@@ -143,7 +147,7 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == this.RESULT_CANCELED) {
+        if (resultCode == RESULT_CANCELED) {
             return;
         }
         if (requestCode == GALLERY) {

@@ -1,42 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.kevinlinxc.guitarautoscroll"
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools">
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.kevinlinxc.guitarautoscroll">
 
-  <application
-      android:allowBackup="true"
-      android:icon="@mipmap/ic_launcher"
-      android:label="@string/app_name"
-      android:largeHeap="true"
-      android:roundIcon="@mipmap/ic_launcher_round"
-      android:supportsRtl="true"
-      android:theme="@style/AppTheme"
-      tools:replace="android:appComponentFactory"
-      android:appComponentFactory="whateverString"
-      tools:ignore="GoogleAppIndexingWarning">
-    <activity
-        android:name=".MainActivity"
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <application
+        android:allowBackup="true"
+        android:appComponentFactory="whateverString"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:screenOrientation="portrait"
-        android:theme="@style/AppTheme.Launcher">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
+        android:largeHeap="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:replace="android:appComponentFactory">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.Launcher">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-        <category android:name="android.intent.category.LAUNCHER"/>
-      </intent-filter>
-    </activity>
-    <activity
-          android:name=".ScrollActivity"
-          android:label="@string/app_name"
-        android:screenOrientation="portrait"
-          android:theme="@style/AppTheme.NoActionBar"/>
-      <activity
-          android:name=".TutorialActivity"
-          android:label="TutorialActivity"
-          android:screenOrientation="portrait"
-          android:theme="@style/AppTheme.NoActionBar" />
-  </application>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ScrollActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".TutorialActivity"
+            android:label="TutorialActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+    </application>
 
 </manifest>
