@@ -64,7 +64,7 @@ public class TutorialActivity extends AppCompatActivity {
         ib.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Back button of tutorial pressed");
+                //Log.d(TAG, "Back button of tutorial pressed");
                 backToActivity();
             }
         });
@@ -119,7 +119,7 @@ public class TutorialActivity extends AppCompatActivity {
 
     public void backToActivity() {
         String fromActivity = getIntent().getStringExtra("fromActivity");
-        Log.d(TAG, fromActivity);
+        //Log.d(TAG, fromActivity);
         if (fromActivity.equals("MainActivity")) {
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

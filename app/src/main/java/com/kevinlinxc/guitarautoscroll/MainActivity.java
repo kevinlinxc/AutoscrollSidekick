@@ -232,12 +232,12 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
                 public void onPermissionsChecked(MultiplePermissionsReport report) {
                     // check if all permissions are granted
                     if (report.areAllPermissionsGranted()) {
-                        Log.d("dev", "All permissions are granted!");
+                        //Log.d("dev", "All permissions are granted!");
                     }
 
                     // check for permanent denial of any permission
                     if (report.isAnyPermissionPermanentlyDenied()) {
-                        Log.d(TAG, "Permission Denied");
+                        //Log.d(TAG, "Permission Denied");
                     }
                 }
 
@@ -303,7 +303,7 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
 
         if (mTabs == null){
             mTabs = new ArrayList<>();
-            Log.d("Main Activity","There were no prexisting tabs");
+            //Log.d("Main Activity","There were no prexisting tabs");
         }
 
     }
@@ -326,7 +326,7 @@ public class MainActivity extends AppCompatActivity  implements ImageAdapter.Ite
         File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
         if (dir.isDirectory()){
             File[] children = dir.listFiles();
-            Log.d("MainActivity","Files being deleted: "+children);
+            //Log.d("MainActivity","Files being deleted: "+children);
             for (int i = 0; i<children.length;i++){
                 children[i].delete();
             }
